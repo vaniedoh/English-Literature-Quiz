@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Literature Quiz</title>
+    <!-- Tailwind CSS CDN for easy styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles for a more elaborate and engaging look */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Vibrant gradient background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden; /* Prevent horizontal scrolling */
+        }
+
+        .quiz-container {
+            background-color: rgba(255, 255, 255, 0.95); /* Slightly transparent white background */
+            border-radius: 2rem; /* More rounded corners */
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3); /* Deeper shadow */
+            padding: 2.5rem;
+            max-width: 90%; /* Responsive width */
+            width: 700px; /* Max width for larger screens */
+            text-align: center;
+            animation: fadeIn 1s ease-out; /* Fade-in animation for the container */
+            position: relative;
+            overflow: hidden; /* Hide overflow from animations */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .option-button {
+            background-color: #f0f4f8; /* Light background for options */
+            color: #333;
+            border: 2px solid #e2e8f0;
+            padding: 1rem 1.5rem;
+            margin-bottom: 0.75rem;
+            border-radius: 1rem; /* Rounded buttons */
+            cursor: pointer;
+            transition: all 0.3s ease; /* Smooth transitions for hover and feedback */
+            width: 100%;
+            text-align: left;
+            font-size: 1.1rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .option-button:hover:not(.correct):not(.incorrect):not(.disabled) {
+            background-color: #e2e8f0;
+            transform: translateY(-3px); /* Slight lift on hover */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .option-button.correct {
+            background-color: #4CAF50; /* Green for correct */
+            color: white;
+            border-color: #4CAF50;
+            transform: scale(1.02); /* Slight scale on correct */
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .option-button.incorrect {
+            background-color: #f44336; /* Red for incorrect */
+            color: white;
+            border-color: #f44336;
+            animation: shake 0.5s; /* Shake animation for incorrect */
+            box-shadow: 0 5px 15px rgba(244, 67, 54, 0.4);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        .option-button.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .feedback-message {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 500;
+            animation: slideInUp 0.5s ease-out;
+            text-align: left;
+        }
+
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .feedback-message.correct {
+            background-color: #e8f5e9; /* Light green */
+            color: #2e7d32; /* Dark green text */
+            border: 1px solid #a5d6a7;
+        }
+
+        .feedback-message.incorrect {
+            background-color: #ffebee; /* Light red */
+            color: #d32f2f; /* Dark red text */
+            border: 1px solid #ef9a9a;
+        }
+
+        .next-button, .start-button, .restart-button {
+            background: linear-gradient(45deg, #8e2de2 0%, #4a00e0 100%); /* Purple gradient */
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 2rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1.5rem;
+            border: none;
+            box-shadow: 0 10px 20px rgba(74, 0, 224, 0.3);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .next-button:hover, .start-button:hover, .restart-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(74, 0, 224, 0.4);
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 1rem;
+            height: 12px;
+            margin-top: 1.5rem;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #fbc02d 0%, #ff8f00 100%); /* Orange gradient */
+            border-radius: 1rem;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .question-text {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 1.5rem;
+            line-height: 1.4;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .result-score {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #4a00e0;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .result-message {
+            font-size: 1.5rem;
+            color: #555;
+            margin-bottom: 2rem;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .quiz-container {
+                padding: 1.5rem;
+                border-radius: 1.5rem;
+            }
+            .question-text {
+                font-size: 1.3rem;
+                margin-bottom: 1rem;
+            }
+            .option-button {
+                padding: 0.8rem 1rem;
+                font-size: 1rem;
+            }
+            .next-button, .start-button, .restart-button {
+                padding: 0.7rem 1.5rem;
+                font-size: 1rem;
+            }
+            .result-score {
+                font-size: 2.5rem;
+            }
+            .result-message {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="quiz-app" class="quiz-container">
+        <!-- Start Screen -->
+        <div id="start-screen" class="flex flex-col items-center p-6">
+            <h1 class="text-4xl font-extrabold text-gray-800 mb-6">Welcome to the English Literature Quiz!</h1>
+            <p class="text-lg text-gray-600 mb-8 text-center">Test your knowledge across various literary periods and authors. Let's see how well you know the classics!</p>
+            <button id="start-button" class="start-button">Start Quiz</button>
+        </div>
+
+        <!-- Quiz Screen (hidden initially) -->
+        <div id="quiz-screen" class="hidden w-full flex flex-col items-center">
+            <div class="progress-bar-container">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+            <p id="question-counter" class="text-gray-500 text-sm mt-3 mb-6"></p>
+            <h2 id="question-text" class="question-text"></h2>
+            <div id="options-container" class="w-full">
+                <!-- Options will be dynamically loaded here -->
+            </div>
+            <div id="feedback-area" class="w-full">
+                <!-- Feedback message and explanation will appear here -->
+            </div>
+            <button id="next-button" class="next-button hidden">Next Question</button>
+        </div>
+
+        <!-- Result Screen (hidden initially) -->
+        <div id="result-screen" class="hidden flex flex-col items-center p-6">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">Quiz Complete!</h2>
+            <p class="result-score"><span id="final-score">0</span> / 50</p>
+            <p id="result-message" class="result-message"></p>
+            <button id="restart-button" class="restart-button">Restart Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        // Array of quiz questions, options, correct answers, and explanations.
+        const quizQuestions = [
+            {
+                question: "Who wrote the epic poem 'Paradise Lost'?",
+                options: ["William Shakespeare", "John Milton", "Geoffrey Chaucer", "Lord Byron"],
+                answer: "John Milton",
+                explanation: "'Paradise Lost' is a monumental epic poem by John Milton, retelling the biblical story of the Fall of Man."
+            },
+            {
+                question: "Which literary period is characterized by a focus on reason, logic, and order, often referred to as the 'Age of Reason'?",
+                options: ["Romanticism", "Victorian Era", "Neoclassical Period", "Modernism"],
+                answer: "Neoclassical Period",
+                explanation: "The Neoclassical Period (roughly 1660-1798) emphasized classical ideals of order, logic, and reason, drawing inspiration from ancient Greece and Rome."
+            },
+            {
+                question: "In Shakespeare's 'Hamlet', what is the name of Ophelia's brother?",
+                options: ["Horatio", "Claudius", "Laertes", "Rosencrantz"],
+                answer: "Laertes",
+                explanation: "Laertes is Ophelia's brother and Polonius's son, who seeks revenge for his father's death."
+            },
+            {
+                question: "Who is the author of 'Pride and Prejudice'?",
+                options: ["Charlotte Brontë", "Jane Austen", "Emily Brontë", "Mary Shelley"],
+                answer: "Jane Austen",
+                explanation: "Jane Austen is celebrated for her romantic novels of manners, including 'Pride and Prejudice', which explores themes of love, class, and societal expectations."
+            },
+            {
+                question: "Which of these is NOT a characteristic of Romanticism?",
+                options: ["Emphasis on emotion and individualism", "Glorification of nature", "Adherence to classical rules and forms", "Interest in the supernatural and mystical"],
+                answer: "Adherence to classical rules and forms",
+                explanation: "Romanticism, a movement from the late 18th to mid-19th century, rebelled against the strict rules of classicism, prioritizing emotion, imagination, and the individual."
+            },
+            {
+                question: "What is the pen name of Mary Ann Evans?",
+                options: ["George Eliot", "Lewis Carroll", "Mark Twain", "Currer Bell"],
+                answer: "George Eliot",
+                explanation: "Mary Ann Evans used the male pen name George Eliot to ensure her work was taken seriously in a male-dominated literary world."
+            },
+            {
+                question: "Which novel by Charles Dickens features the character Ebenezer Scrooge?",
+                options: ["Oliver Twist", "Great Expectations", "A Christmas Carol", "David Copperfield"],
+                answer: "A Christmas Carol",
+                explanation: "'A Christmas Carol' is a timeless novella by Charles Dickens, telling the story of Scrooge's transformation from a miserly recluse to a benevolent man."
+            },
+            {
+                question: "Who wrote 'Frankenstein'?",
+                options: ["Jane Austen", "Emily Brontë", "Mary Shelley", "Virginia Woolf"],
+                answer: "Mary Shelley",
+                explanation: "Mary Shelley's 'Frankenstein; or, The Modern Prometheus' is a pioneering work of science fiction and Gothic horror."
+            },
+            {
+                question: "The 'Lost Generation' refers to writers who came of age during which major historical event?",
+                options: ["World War I", "The Great Depression", "World War II", "The Cold War"],
+                answer: "World War I",
+                explanation: "The 'Lost Generation' is a term coined by Gertrude Stein for the generation reaching maturity during and after World War I, many of whom became expatriates in Europe."
+            },
+            {
+                question: "Which poet is known for his 'Odes', including 'Ode to a Nightingale' and 'Ode on a Grecian Urn'?",
+                options: ["William Wordsworth", "Lord Byron", "Percy Bysshe Shelley", "John Keats"],
+                answer: "John Keats",
+                explanation: "John Keats was a major figure of the second generation of Romantic poets, celebrated for his lyrical and sensory odes."
+            },
+            {
+                question: "What is the central theme of George Orwell's '1984'?",
+                options: ["Individual freedom and self-discovery", "The dangers of totalitarianism and surveillance", "The beauty of nature and rural life", "The complexities of romantic love"],
+                answer: "The dangers of totalitarianism and surveillance",
+                explanation: "'1984' is a dystopian novel by George Orwell, portraying a society under constant surveillance and control by a totalitarian regime."
+            },
+            {
+                question: "Who is the author of 'The Great Gatsby'?",
+                options: ["Ernest Hemingway", "F. Scott Fitzgerald", "William Faulkner", "John Steinbeck"],
+                answer: "F. Scott Fitzgerald",
+                explanation: "F. Scott Fitzgerald's 'The Great Gatsby' is a quintessential novel of the Jazz Age, exploring themes of the American Dream, wealth, and illusion."
+            },
+            {
+                question: "Which play by Shakespeare features the feuding families of Montagues and Capulets?",
+                options: ["Othello", "Macbeth", "Romeo and Juliet", "King Lear"],
+                answer: "Romeo and Juliet",
+                explanation: "'Romeo and Juliet' is one of Shakespeare's most famous tragedies, depicting the tragic love story of two young star-crossed lovers from rival families."
+            },
+            {
+                question: "What literary device involves a contrast between what is said and what is actually meant?",
+                options: ["Metaphor", "Simile", "Irony", "Alliteration"],
+                answer: "Irony",
+                explanation: "Irony is a literary device where the intended meaning is different from the literal meaning, often used for emphasis or humor."
+            },
+            {
+                question: "Which author is famous for her detective novels featuring Hercule Poirot and Miss Marple?",
+                options: ["Agatha Christie", "Arthur Conan Doyle", "Dorothy L. Sayers", "P.D. James"],
+                answer: "Agatha Christie",
+                explanation: "Agatha Christie is known as the 'Queen of Crime' for her prolific output of detective fiction, creating iconic characters like Hercule Poirot and Miss Marple."
+            },
+            {
+                question: "In 'To Kill a Mockingbird', who is the narrator?",
+                options: ["Jem Finch", "Atticus Finch", "Scout Finch", "Boo Radley"],
+                answer: "Scout Finch",
+                explanation: "The story of 'To Kill a Mockingbird' is narrated by Jean Louise 'Scout' Finch, a young girl growing up in the American South during the 1930s."
+            },
+            {
+                question: "Which of these works is an example of a dystopian novel?",
+                options: ["The Catcher in the Rye", "Brave New World", "On the Road", "To the Lighthouse"],
+                answer: "Brave New World",
+                explanation: "Aldous Huxley's 'Brave New World' is a classic dystopian novel that explores a future society controlled by technology and conditioning."
+            },
+            {
+                question: "Who wrote 'The Odyssey'?",
+                options: ["Virgil", "Homer", "Sophocles", "Euripides"],
+                answer: "Homer",
+                explanation: "'The Odyssey' is one of two major ancient Greek epic poems attributed to Homer, narrating the ten-year journey of Odysseus back to Ithaca."
+            },
+            {
+                question: "Which literary movement emerged in the early 20th century and emphasized fragmentation, stream of consciousness, and a break from traditional forms?",
+                options: ["Realism", "Naturalism", "Modernism", "Postmodernism"],
+                answer: "Modernism",
+                explanation: "Modernism was a broad movement in the early 20th century that experimented with literary form and expression, often reflecting disillusionment with traditional values."
+            },
+            {
+                question: "What is the setting for Emily Brontë's 'Wuthering Heights'?",
+                options: ["The bustling streets of London", "The isolated Yorkshire moors", "The French countryside", "A grand Scottish castle"],
+                answer: "The isolated Yorkshire moors",
+                explanation: "'Wuthering Heights' is set on the wild and desolate Yorkshire moors, a landscape that mirrors the passionate and turbulent nature of its characters."
+            },
+            {
+                question: "Which author is known for his philosophical novel 'The Stranger'?",
+                options: ["Jean-Paul Sartre", "Albert Camus", "Franz Kafka", "Fyodor Dostoevsky"],
+                answer: "Albert Camus",
+                explanation: "Albert Camus, a key figure in absurdism, wrote 'The Stranger' (L'Étranger), exploring themes of alienation and the meaninglessness of existence."
+            },
+            {
+                question: "Who wrote 'The Canterbury Tales'?",
+                options: ["William Langland", "John Gower", "Geoffrey Chaucer", "Thomas Malory"],
+                answer: "Geoffrey Chaucer",
+                explanation: "Geoffrey Chaucer's 'The Canterbury Tales' is a collection of stories written in Middle English, told by a group of pilgrims on their way to Canterbury."
+            },
+            {
+                question: "Which Shakespearean play features the famous line, 'To be, or not to be, that is the question'?",
+                options: ["Othello", "Macbeth", "Hamlet", "King Lear"],
+                answer: "Hamlet",
+                explanation: "This iconic soliloquy is delivered by Prince Hamlet in Act 3, Scene 1 of Shakespeare's 'Hamlet', contemplating life and death."
+            },
+            {
+                question: "Which author is associated with the stream of consciousness technique in novels like 'Mrs Dalloway' and 'To the Lighthouse'?",
+                options: ["Virginia Woolf", "James Joyce", "Marcel Proust", "T.S. Eliot"],
+                answer: "Virginia Woolf",
+                explanation: "Virginia Woolf was a pioneering modernist writer who extensively used the stream of consciousness narrative technique to explore her characters' inner lives."
+            },
+            {
+                question: "What is the name of the protagonist in J.D. Salinger's 'The Catcher in the Rye'?",
+                options: ["Jay Gatsby", "Holden Caulfield", "Atticus Finch", "Winston Smith"],
+                answer: "Holden Caulfield",
+                explanation: "Holden Caulfield is the cynical and disillusioned teenage protagonist of 'The Catcher in the Rye', a novel that explores themes of alienation and innocence."
+            },
+            {
+                question: "Which collection of poems includes 'The Waste Land'?",
+                options: ["Leaves of Grass", "Lyrical Ballads", "The Waste Land and Other Poems", "Four Quartets"],
+                answer: "The Waste Land and Other Poems",
+                explanation: "'The Waste Land' is a long poem by T.S. Eliot, considered a masterpiece of modernist poetry, reflecting post-World War I disillusionment."
+            },
+            {
+                question: "Who is the author of 'Moby Dick'?",
+                options: ["Mark Twain", "Herman Melville", "Nathaniel Hawthorne", "Edgar Allan Poe"],
+                answer: "Herman Melville",
+                explanation: "Herman Melville's 'Moby Dick; or, The Whale' is an epic novel of the sea, exploring themes of obsession, revenge, and the human struggle against nature."
+            },
+            {
+                question: "Which literary movement emphasized the depiction of reality, often focusing on the lives of ordinary people?",
+                options: ["Romanticism", "Realism", "Symbolism", "Surrealism"],
+                answer: "Realism",
+                explanation: "Realism, a movement in the mid-19th century, aimed to represent subject matter truthfully, without artificiality or supernatural elements, focusing on everyday life."
+            },
+            {
+                question: "Who wrote 'The Raven'?",
+                options: ["Edgar Allan Poe", "Walt Whitman", "Henry Wadsworth Longfellow", "Emily Dickinson"],
+                answer: "Edgar Allan Poe",
+                explanation: "'The Raven' is a narrative poem by Edgar Allan Poe, known for its musicality, supernatural atmosphere, and psychological intensity."
+            },
+            {
+                question: "Which novel by Harper Lee addresses themes of racial injustice in the American South?",
+                options: ["Go Set a Watchman", "The Help", "To Kill a Mockingbird", "Their Eyes Were Watching God"],
+                answer: "To Kill a Mockingbird",
+                explanation: "Harper Lee's 'To Kill a Mockingbird' is a powerful novel that explores themes of racial inequality, justice, and childhood innocence in the 1930s American South."
+            },
+            {
+                question: "What is the literary term for a character who contrasts with another character, usually the protagonist, to highlight particular qualities of the other character?",
+                options: ["Antagonist", "Protagonist", "Foil", "Confidant"],
+                answer: "Foil",
+                explanation: "A foil is a character who contrasts with another character, typically the protagonist, to emphasize their traits, often through juxtaposition."
+            },
+            {
+                question: "Which author is known for his satirical novel 'Gulliver's Travels'?",
+                options: ["Daniel Defoe", "Jonathan Swift", "Henry Fielding", "Samuel Richardson"],
+                answer: "Jonathan Swift",
+                explanation: "Jonathan Swift's 'Gulliver's Travels' is a biting satire on human nature and the political landscape of 18th-century England."
+            },
+            {
+                question: "Who wrote 'Wuthering Heights'?",
+                options: ["Charlotte Brontë", "Emily Brontë", "Anne Brontë", "Jane Austen"],
+                answer: "Emily Brontë",
+                explanation: "Emily Brontë's only novel, 'Wuthering Heights', is a classic of English literature, known for its intense passion and Gothic elements."
+            },
+            {
+                question: "Which literary device is a figure of speech involving the comparison of one thing with another thing of a different kind, used to make a description more emphatic or vivid (e.g., as brave as a lion)?",
+                options: ["Metaphor", "Simile", "Personification", "Hyperbole"],
+                answer: "Simile",
+                explanation: "A simile is a direct comparison between two unlike things using 'like' or 'as'."
+            },
+            {
+                question: "Who is the author of 'The Lord of the Rings' series?",
+                options: ["C.S. Lewis", "J.R.R. Tolkien", "George R.R. Martin", "Ursula K. Le Guin"],
+                answer: "J.R.R. Tolkien",
+                explanation: "J.R.R. Tolkien's 'The Lord of the Rings' is a high-fantasy epic that has significantly influenced the fantasy genre."
+            },
+            {
+                question: "Which poet is considered the pioneer of English sonnets?",
+                options: ["William Shakespeare", "John Milton", "Sir Philip Sidney", "Francesco Petrarch"],
+                answer: "William Shakespeare",
+                explanation: "While Petrarch popularized the sonnet form in Italy, William Shakespeare is renowned for his distinct English (or Shakespearean) sonnets."
+            },
+            {
+                question: "What is the name of the protagonist in Dostoyevsky's 'Crime and Punishment'?",
+                options: ["Ivan Karamazov", "Raskolnikov", "Prince Myshkin", "Alyosha Karamazov"],
+                answer: "Raskolnikov",
+                explanation: "Rodion Raskolnikov is the impoverished former student who commits murder in Fyodor Dostoyevsky's psychological novel 'Crime and Punishment'."
+            },
+            {
+                question: "Which literary movement focused on the inner lives of characters, often using symbolism and psychological depth?",
+                options: ["Existentialism", "Romanticism", "Modernism", "Victorianism"],
+                answer: "Modernism",
+                explanation: "Modernism, especially in its later phases, delved deeply into the psychological complexities of characters, moving away from external realism."
+            },
+            {
+                question: "Who wrote 'Les Misérables'?",
+                options: ["Alexandre Dumas", "Victor Hugo", "Gustave Flaubert", "Émile Zola"],
+                answer: "Victor Hugo",
+                explanation: "Victor Hugo's 'Les Misérables' is a sprawling historical novel set in 19th-century France, exploring themes of justice, redemption, and love."
+            },
+            {
+                question: "Which American author is known for his short stories, particularly those with dark and macabre themes, such as 'The Tell-Tale Heart'?",
+                options: ["Washington Irving", "Nathaniel Hawthorne", "Edgar Allan Poe", "Herman Melville"],
+                answer: "Edgar Allan Poe",
+                explanation: "Edgar Allan Poe is a master of the macabre and psychological horror, known for his influential short stories and poetry."
+            },
+            {
+                question: "What is the term for a long narrative poem, typically about heroic deeds and events significant to a culture or nation?",
+                options: ["Lyric", "Ballad", "Epic", "Sonnet"],
+                answer: "Epic",
+                explanation: "An epic poem is a lengthy narrative poem, usually dealing with a serious subject, involving heroic deeds and significant events."
+            },
+            {
+                question: "Which author is famous for her Gothic novel 'Rebecca'?",
+                options: ["Agatha Christie", "Daphne du Maurier", "Mary Shelley", "Shirley Jackson"],
+                answer: "Daphne du Maurier",
+                explanation: "Daphne du Maurier's 'Rebecca' is a classic Gothic novel featuring a nameless narrator haunted by the memory of her husband's first wife."
+            },
+            {
+                question: "In 'A Midsummer Night's Dream', who is the mischievous fairy who causes chaos with a love potion?",
+                options: ["Titania", "Oberon", "Puck", "Hermia"],
+                answer: "Puck",
+                explanation: "Puck (also known as Robin Goodfellow) is the mischievous sprite who serves Oberon and plays a central role in the comedic misunderstandings of the play."
+            },
+            {
+                question: "Which novel by Jane Austen features the Dashwood sisters, Elinor and Marianne?",
+                options: ["Pride and Prejudice", "Emma", "Sense and Sensibility", "Mansfield Park"],
+                answer: "Sense and Sensibility",
+                explanation: "'Sense and Sensibility' explores the contrasting personalities of the Dashwood sisters, one guided by reason (sense) and the other by emotion (sensibility)."
+            },
+            {
+                question: "Who wrote 'The Picture of Dorian Gray'?",
+                options: ["Oscar Wilde", "Robert Louis Stevenson", "Bram Stoker", "Charles Dickens"],
+                answer: "Oscar Wilde",
+                explanation: "Oscar Wilde's only novel, 'The Picture of Dorian Gray', is a Gothic and philosophical work exploring themes of beauty, morality, and corruption."
+            },
+            {
+                question: "Which literary period followed the Victorian Era and saw a rise in experimental forms and themes?",
+                options: ["Romanticism", "Neoclassicism", "Modernism", "Postmodernism"],
+                answer: "Modernism",
+                explanation: "Modernism, roughly from the early 20th century to the mid-20th century, was a reaction against the conventions of the Victorian era, embracing innovation."
+            },
+            {
+                question: "What is the term for a literary work that imitates the style of another work for comic effect or ridicule?",
+                options: ["Parody", "Satire", "Allegory", "Fable"],
+                answer: "Parody",
+                explanation: "A parody is an imitation of the style of a particular writer, artist, or genre with deliberate exaggeration for comic effect."
+            },
+            {
+                question: "Who is the author of 'The Handmaid's Tale'?",
+                options: ["Ursula K. Le Guin", "Margaret Atwood", "Octavia Butler", "Shirley Jackson"],
+                answer: "Margaret Atwood",
+                explanation: "Margaret Atwood's 'The Handmaid's Tale' is a dystopian novel set in a totalitarian society where women are subjugated."
+            },
+            {
+                question: "Which English poet is known for his work 'The Rime of the Ancient Mariner'?",
+                options: ["William Wordsworth", "Samuel Taylor Coleridge", "Lord Byron", "John Keats"],
+                answer: "Samuel Taylor Coleridge",
+                explanation: "'The Rime of the Ancient Mariner' is a major poem by Samuel Taylor Coleridge, a foundational work of British Romanticism."
+            },
+            {
+                question: "What is the name of the fictional country where 'Gulliver's Travels' begins, inhabited by tiny people?",
+                options: ["Brobdingnag", "Laputa", "Lilliput", "Houyhnhnm Land"],
+                answer: "Lilliput",
+                explanation: "Gulliver's first voyage takes him to Lilliput, a land where the inhabitants are only six inches tall."
+            },
+            {
+                question: "Which author wrote 'One Hundred Years of Solitude'?",
+                options: ["Gabriel García Márquez", "Jorge Luis Borges", "Julio Cortázar", "Pablo Neruda"],
+                answer: "Gabriel García Márquez",
+                explanation: "Gabriel García Márquez's 'One Hundred Years of Solitude' is a landmark novel of magical realism, chronicling the Buendía family across generations."
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let quizStarted = false;
+        let answeredThisQuestion = false;
+
+        // Get DOM elements
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const startButton = document.getElementById('start-button');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackArea = document.getElementById('feedback-area');
+        const nextButton = document.getElementById('next-button');
+        const questionCounter = document.getElementById('question-counter');
+        const progressBar = document.getElementById('progress-bar');
+        const finalScore = document.getElementById('final-score');
+        const resultMessage = document.getElementById('result-message');
+        const restartButton = document.getElementById('restart-button');
+
+        // Event Listeners
+        startButton.addEventListener('click', startQuiz);
+        nextButton.addEventListener('click', loadNextQuestion);
+        restartButton.addEventListener('click', restartQuiz);
+
+        /**
+         * Initializes and starts the quiz. Hides the start screen and displays the quiz screen.
+         */
+        function startQuiz() {
+            quizStarted = true;
+            startScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            currentQuestionIndex = 0;
+            score = 0;
+            loadQuestion();
+            updateProgressBar();
+            // Update the total questions displayed on the result screen
+            document.getElementById('final-score').nextSibling.textContent = ` / ${quizQuestions.length}`;
+        }
+
+        /**
+         * Loads the current question from the quizQuestions array and displays it.
+         * Also renders the options as clickable buttons.
+         */
+        function loadQuestion() {
+            answeredThisQuestion = false; // Reset for the new question
+            nextButton.classList.add('hidden'); // Hide next button until answered
+            feedbackArea.innerHTML = ''; // Clear previous feedback
+
+            if (currentQuestionIndex < quizQuestions.length) {
+                const currentQuestion = quizQuestions[currentQuestionIndex];
+                questionText.textContent = currentQuestion.question;
+                optionsContainer.innerHTML = ''; // Clear previous options
+
+                // Update question counter
+                questionCounter.textContent = `Question ${currentQuestionIndex + 1} of ${quizQuestions.length}`;
+
+                // Create option buttons
+                currentQuestion.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.textContent = option;
+                    button.classList.add('option-button', 'block', 'mb-3', 'rounded-xl', 'transition', 'duration-300', 'ease-in-out');
+                    button.addEventListener('click', () => selectOption(button, option, currentQuestion.answer, currentQuestion.explanation));
+                    optionsContainer.appendChild(button);
+                });
+                updateProgressBar();
+            } else {
+                showResultScreen(); // If all questions are answered, show results
+            }
+        }
+
+        /**
+         * Handles the user's option selection. Provides visual feedback and displays explanation.
+         * @param {HTMLButtonElement} selectedButton - The button element that was clicked.
+         * @param {string} selectedOption - The text of the selected option.
+         * @param {string} correctAnswer - The correct answer for the current question.
+         * @param {string} explanation - The explanation for the correct answer.
+         */
+        function selectOption(selectedButton, selectedOption, correctAnswer, explanation) {
+            if (answeredThisQuestion) return; // Prevent multiple answers for the same question
+            answeredThisQuestion = true;
+
+            const allOptions = optionsContainer.querySelectorAll('.option-button');
+            allOptions.forEach(button => {
+                button.classList.add('disabled'); // Disable all buttons after selection
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('correct'); // Highlight correct answer
+                }
+            });
+
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.classList.add('feedback-message', 'mt-4', 'p-4', 'rounded-lg', 'text-left');
+
+            if (selectedOption === correctAnswer) {
+                score++;
+                selectedButton.classList.add('correct');
+                feedbackDiv.classList.add('correct');
+                feedbackDiv.innerHTML = `<p class="font-bold">Correct!</p><p>${explanation}</p>`;
+            } else {
+                selectedButton.classList.add('incorrect');
+                feedbackDiv.classList.add('incorrect');
+                feedbackDiv.innerHTML = `<p class="font-bold">Incorrect. The correct answer was: "${correctAnswer}".</p><p>${explanation}</p>`;
+            }
+            feedbackArea.appendChild(feedbackDiv);
+            nextButton.classList.remove('hidden'); // Show next button
+        }
+
+        /**
+         * Loads the next question or shows the result screen if the quiz is finished.
+         */
+        function loadNextQuestion() {
+            currentQuestionIndex++;
+            loadQuestion();
+        }
+
+        /**
+         * Updates the progress bar based on the current question index.
+         */
+        function updateProgressBar() {
+            const progress = ((currentQuestionIndex) / quizQuestions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        /**
+         * Displays the final score and a message based on performance.
+         */
+        function showResultScreen() {
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+            finalScore.textContent = score;
+
+            let message = "";
+            if (score === quizQuestions.length) {
+                message = "Outstanding! You're a true English Literature expert!";
+            } else if (score >= quizQuestions.length * 0.75) {
+                message = "Excellent job! You have a strong grasp of English Literature.";
+            } else if (score >= quizQuestions.length * 0.5) {
+                message = "Good effort! Keep studying to master English Literature.";
+            } else {
+                message = "Nice try! There's always room for improvement. Keep reading!";
+            }
+            resultMessage.textContent = message;
+        }
+
+        /**
+         * Resets the quiz to its initial state and returns to the start screen.
+         */
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            quizStarted = false;
+            answeredThisQuestion = false;
+            resultScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+            progressBar.style.width = '0%'; // Reset progress bar
+        }
+
+        // Initial state: show start screen
+        document.addEventListener('DOMContentLoaded', () => {
+            startScreen.classList.remove('hidden');
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+        });
+    </script>
+</body>
+</html>
+
+  
